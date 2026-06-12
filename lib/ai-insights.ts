@@ -221,9 +221,32 @@ export async function generateInsights(data: TenantData): Promise<InsightsRespon
     });
 
     const text = message.content.filter(b => b.type === 'text').map(b => (b as { text: string }).text).join('');
-    const parsed = InsightsSchema.parse(extractJson(text));
+    const raw = extractJson(text);
+    const result = InsightsSchema.safeParse(raw);
 
-    return { ...parsed, costTrend, generatedAt: new Date().toISOString(), model };
+    if (result.success) {
+      return { ...result.data, costTrend, generatedAt: new Date().toISOString(), model };
+    }
+
+    // Log validation errors but still try to use partial data
+    console.warn('AI response Zod validation failed:', JSON.stringify(result.error.issues.slice(0, 5)));
+    // Attempt lenient parse: fill missing fields with defaults
+    const lenient = {
+      healthScore: { current: 100, previous: null, reasoning: '', bySubscription: [] },
+      morningBrief: { summary: '', highlights: [] },
+      priorityActions: [],
+      advisorClusters: [],
+      costAnomalies: [],
+      correlations: [],
+      retirementImpacts: [],
+      ...(raw as object),
+    };
+    const retryResult = InsightsSchema.safeParse(lenient);
+    if (retryResult.success) {
+      return { ...retryResult.data, costTrend, generatedAt: new Date().toISOString(), model };
+    }
+
+    throw new Error(`Zod validation failed: ${result.error.issues.map(i => i.message).join(', ')}`);
   } catch (err) {
     console.error('AI insights generation failed, using fallback:', err);
     return { ...buildFallbackInsights(data), costTrend, generatedAt: new Date().toISOString(), model: 'fallback', degraded: true };
