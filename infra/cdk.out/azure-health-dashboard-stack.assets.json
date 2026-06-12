@@ -1,0 +1,21 @@
+{
+  "version": "54.0.0",
+  "files": {
+    "7f92ee2fee36f21419cc793bf2f9c1de5dd8779e960828db08271413b17e253e": {
+      "displayName": "azure-health-dashboard-stack Template",
+      "source": {
+        "path": "azure-health-dashboard-stack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-eu-west-1-29e19cbf": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-eu-west-1",
+          "objectKey": "7f92ee2fee36f21419cc793bf2f9c1de5dd8779e960828db08271413b17e253e.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-eu-west-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

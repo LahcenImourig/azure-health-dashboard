@@ -1,0 +1,703 @@
+{
+ "Resources": {
+  "EcrRepoBB83A592": {
+   "Type": "AWS::ECR::Repository",
+   "Properties": {
+    "LifecyclePolicy": {
+     "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"selection\":{\"tagStatus\":\"any\",\"countType\":\"imageCountMoreThan\",\"countNumber\":10},\"action\":{\"type\":\"expire\"}}]}"
+    },
+    "RepositoryName": "azure-health-dashboard"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/EcrRepo/Resource"
+   }
+  },
+  "AppSecretsA1997F2A": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "Secrets for Azure Health Dashboard",
+    "GenerateSecretString": {
+     "GenerateStringKey": "_generated",
+     "SecretStringTemplate": "{\"AZURE_CLIENT_SECRET\":\"REPLACE_ME\",\"AZURE_AD_CLIENT_SECRET\":\"REPLACE_ME\",\"NEXTAUTH_SECRET\":\"REPLACE_ME_RANDOM_32_CHARS\",\"TEAMS_WEBHOOK_URL\":\"REPLACE_ME\",\"CRON_SECRET\":\"REPLACE_ME_RANDOM_32_CHARS\"}"
+    },
+    "Name": "azure-health-dashboard/secrets"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppSecrets/Resource"
+   }
+  },
+  "AppRunnerInstanceRole96A5A063": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "tasks.apprunner.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Role for App Runner service (Bedrock + Secrets)"
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppRunnerInstanceRole/Resource"
+   }
+  },
+  "AppRunnerInstanceRoleDefaultPolicy35195718": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:bedrock:*::foundation-model/anthropic.claude-*",
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:bedrock:*:",
+           {
+            "Ref": "AWS::AccountId"
+           },
+           ":inference-profile/eu.anthropic.claude-*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:bedrock:*:",
+           {
+            "Ref": "AWS::AccountId"
+           },
+           ":inference-profile/us.anthropic.claude-*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "secretsmanager:GetSecretValue",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "AppSecretsA1997F2A"
+       }
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AppRunnerInstanceRoleDefaultPolicy35195718",
+    "Roles": [
+     {
+      "Ref": "AppRunnerInstanceRole96A5A063"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppRunnerInstanceRole/DefaultPolicy/Resource"
+   }
+  },
+  "AppRunnerAccessRoleC89E5843": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "build.apprunner.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppRunnerAccessRole/Resource"
+   }
+  },
+  "AppRunnerAccessRoleDefaultPolicy4FF2CFAF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "EcrRepoBB83A592",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AppRunnerAccessRoleDefaultPolicy4FF2CFAF",
+    "Roles": [
+     {
+      "Ref": "AppRunnerAccessRoleC89E5843"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppRunnerAccessRole/DefaultPolicy/Resource"
+   }
+  },
+  "AutoScaling": {
+   "Type": "AWS::AppRunner::AutoScalingConfiguration",
+   "Properties": {
+    "AutoScalingConfigurationName": "azure-health-dashboard-autoscale",
+    "MaxConcurrency": 100,
+    "MaxSize": 3,
+    "MinSize": 1
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AutoScaling"
+   }
+  },
+  "AppRunnerService": {
+   "Type": "AWS::AppRunner::Service",
+   "Properties": {
+    "AutoScalingConfigurationArn": {
+     "Fn::GetAtt": [
+      "AutoScaling",
+      "AutoScalingConfigurationArn"
+     ]
+    },
+    "HealthCheckConfiguration": {
+     "HealthyThreshold": 1,
+     "Interval": 10,
+     "Path": "/",
+     "Protocol": "HTTP",
+     "Timeout": 5,
+     "UnhealthyThreshold": 5
+    },
+    "InstanceConfiguration": {
+     "Cpu": "1 vCPU",
+     "InstanceRoleArn": {
+      "Fn::GetAtt": [
+       "AppRunnerInstanceRole96A5A063",
+       "Arn"
+      ]
+     },
+     "Memory": "2 GB"
+    },
+    "ServiceName": "azure-health-dashboard",
+    "SourceConfiguration": {
+     "AuthenticationConfiguration": {
+      "AccessRoleArn": {
+       "Fn::GetAtt": [
+        "AppRunnerAccessRoleC89E5843",
+        "Arn"
+       ]
+      }
+     },
+     "ImageRepository": {
+      "ImageConfiguration": {
+       "Port": "3000",
+       "RuntimeEnvironmentVariables": [
+        {
+         "Name": "AI_PROVIDER",
+         "Value": "bedrock"
+        },
+        {
+         "Name": "AWS_REGION",
+         "Value": "eu-west-1"
+        },
+        {
+         "Name": "BEDROCK_MODEL_ID",
+         "Value": "eu.anthropic.claude-sonnet-4-20250514"
+        },
+        {
+         "Name": "AZURE_TENANT_ID",
+         "Value": "REPLACE_IN_CONSOLE"
+        },
+        {
+         "Name": "AZURE_CLIENT_ID",
+         "Value": "REPLACE_IN_CONSOLE"
+        },
+        {
+         "Name": "AZURE_AD_TENANT_ID",
+         "Value": "REPLACE_IN_CONSOLE"
+        },
+        {
+         "Name": "AZURE_AD_CLIENT_ID",
+         "Value": "REPLACE_IN_CONSOLE"
+        },
+        {
+         "Name": "AZURE_MONTHLY_BUDGET_USD",
+         "Value": "5000"
+        },
+        {
+         "Name": "REMEDIATION_ENABLED",
+         "Value": "false"
+        },
+        {
+         "Name": "NODE_ENV",
+         "Value": "production"
+        },
+        {
+         "Name": "SECRETS_ARN",
+         "Value": {
+          "Ref": "AppSecretsA1997F2A"
+         }
+        }
+       ]
+      },
+      "ImageIdentifier": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::Select": [
+           4,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "EcrRepoBB83A592",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".dkr.ecr.",
+         {
+          "Fn::Select": [
+           3,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "EcrRepoBB83A592",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/",
+         {
+          "Ref": "EcrRepoBB83A592"
+         },
+         ":latest"
+        ]
+       ]
+      },
+      "ImageRepositoryType": "ECR"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppRunnerService"
+   }
+  },
+  "ReportLambdaLogsE26809BB": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/aws/lambda/azure-health-dashboard-daily-report",
+    "RetentionInDays": 14
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/ReportLambdaLogs/Resource"
+   }
+  },
+  "ReportLambdaRoleA69C9B03": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/ReportLambdaRole/Resource"
+   }
+  },
+  "ReportLambdaRoleDefaultPolicyBD461524": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "secretsmanager:GetSecretValue",
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "AppSecretsA1997F2A"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ReportLambdaRoleDefaultPolicyBD461524",
+    "Roles": [
+     {
+      "Ref": "ReportLambdaRoleA69C9B03"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/ReportLambdaRole/DefaultPolicy/Resource"
+   }
+  },
+  "DailyReportLambdaD20B30F7": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "\nconst { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');\n\nexports.handler = async () => {\n  const sm = new SecretsManagerClient({});\n  const secretResp = await sm.send(new GetSecretValueCommand({ SecretId: process.env.SECRETS_ARN }));\n  const secrets = JSON.parse(secretResp.SecretString);\n  const cronSecret = secrets.CRON_SECRET;\n  const dashboardUrl = process.env.DASHBOARD_URL;\n\n  console.log('Triggering daily report at', new Date().toISOString());\n\n  const response = await fetch(dashboardUrl + '/api/report/generate', {\n    method: 'POST',\n    headers: {\n      'Authorization': 'Bearer ' + cronSecret,\n      'Content-Type': 'application/json',\n    },\n  });\n\n  if (!response.ok) {\n    const body = await response.text();\n    throw new Error('Report API returned ' + response.status + ': ' + body);\n  }\n\n  const result = await response.json();\n  console.log('Report sent successfully');\n  return { statusCode: 200, body: JSON.stringify(result) };\n};\n      "
+    },
+    "Environment": {
+     "Variables": {
+      "DASHBOARD_URL": {
+       "Fn::Join": [
+        "",
+        [
+         "https://",
+         {
+          "Fn::GetAtt": [
+           "AppRunnerService",
+           "ServiceUrl"
+          ]
+         }
+        ]
+       ]
+      },
+      "SECRETS_ARN": {
+       "Ref": "AppSecretsA1997F2A"
+      }
+     }
+    },
+    "FunctionName": "azure-health-dashboard-daily-report",
+    "Handler": "index.handler",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "ReportLambdaLogsE26809BB"
+     }
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "ReportLambdaRoleA69C9B03",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 60
+   },
+   "DependsOn": [
+    "ReportLambdaRoleDefaultPolicyBD461524",
+    "ReportLambdaRoleA69C9B03"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/DailyReportLambda/Resource"
+   }
+  },
+  "SchedulerRole59E73443": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "scheduler.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/SchedulerRole/Resource"
+   }
+  },
+  "SchedulerRoleDefaultPolicy66F774B8": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "DailyReportLambdaD20B30F7",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "DailyReportLambdaD20B30F7",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "SchedulerRoleDefaultPolicy66F774B8",
+    "Roles": [
+     {
+      "Ref": "SchedulerRole59E73443"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/SchedulerRole/DefaultPolicy/Resource"
+   }
+  },
+  "DailyReportSchedule": {
+   "Type": "AWS::Scheduler::Schedule",
+   "Properties": {
+    "FlexibleTimeWindow": {
+     "Mode": "OFF"
+    },
+    "Name": "azure-health-dashboard-daily-report",
+    "ScheduleExpression": "cron(0 7 * * ? *)",
+    "ScheduleExpressionTimezone": "Europe/Paris",
+    "Target": {
+     "Arn": {
+      "Fn::GetAtt": [
+       "DailyReportLambdaD20B30F7",
+       "Arn"
+      ]
+     },
+     "RoleArn": {
+      "Fn::GetAtt": [
+       "SchedulerRole59E73443",
+       "Arn"
+      ]
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/DailyReportSchedule"
+   }
+  },
+  "AppLogGroup7D8CD952": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/apprunner/azure-health-dashboard",
+    "RetentionInDays": 14
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/AppLogGroup/Resource"
+   }
+  },
+  "Error5xxAlarm28B85FDC": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmName": "azure-health-dashboard-5xx-errors",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "Dimensions": [
+     {
+      "Name": "ServiceName",
+      "Value": "azure-health-dashboard"
+     }
+    ],
+    "EvaluationPeriods": 2,
+    "MetricName": "5xxStatusResponses",
+    "Namespace": "AWS/AppRunner",
+    "Period": 300,
+    "Statistic": "Sum",
+    "Threshold": 10
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/Error5xxAlarm/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/0VQy2oDMQz8lt69LgkU2mMItJdCSvYDimI7GyW2ZfxIKMb/Xnm3S0+a0WjGsrZy+/IqN0/wSIPSt8HiSdYxg7oJbn1Xo6KsRxMoYab4I/Zn/8+aSKybnBx4mAxPjjPvUwtqAsFxAFkzW3v9IotqTlpQExBCLN73AO7uSqZRgUU/7cmfcSoRMpJfUuMdlWnC0pRk/aTpI1IJXVoxa+BOGmR9L16txhXzyupidLH8WM/7I0JZKvoBWV1k3VmIrptm0FqHh5JD4e940kZe0/N9w1d748NdE+LA22d0Rh6X+gsaoj55VQEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "azure-health-dashboard-stack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "AppUrl": {
+   "Description": "App Runner service URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "AppRunnerService",
+        "ServiceUrl"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "EcrUri": {
+   "Description": "ECR repository URI",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "EcrRepoBB83A592",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "EcrRepoBB83A592",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "EcrRepoBB83A592"
+      }
+     ]
+    ]
+   }
+  },
+  "SecretsArn": {
+   "Description": "Secrets Manager ARN",
+   "Value": {
+    "Ref": "AppSecretsA1997F2A"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

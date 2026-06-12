@@ -1,0 +1,340 @@
+{
+  "/azure-health-dashboard-stack": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AutoScaling": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AutoScaling"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:118:36)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppRunnerService": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppRunnerService"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:78:21)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/DailyReportSchedule": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DailyReportSchedule"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:194:5)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppUrl"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:229:5)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/EcrUri": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrUri"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:234:5)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/SecretsArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SecretsArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:239:5)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/EcrRepo/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepoBB83A592"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Repository2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:24:18)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppSecrets/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppSecretsA1997F2A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Secret2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:31:20)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppRunnerInstanceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppRunnerInstanceRole96A5A063"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:47:26)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppRunnerAccessRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppRunnerAccessRoleC89E5843"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:72:24)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/ReportLambdaLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ReportLambdaLogsE26809BB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:127:28)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/ReportLambdaRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ReportLambdaRoleA69C9B03"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:133:30)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/DailyReportLambda/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DailyReportLambdaD20B30F7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Function2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:145:26)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/SchedulerRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SchedulerRole59E73443"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:189:27)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppLogGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppLogGroup7D8CD952"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new LogGroup2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:206:25)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/Error5xxAlarm/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Error5xxAlarm28B85FDC"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Alarm2 in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:220:5)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppRunnerInstanceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppRunnerInstanceRoleDefaultPolicy35195718"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:52:18)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/AppRunnerAccessRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppRunnerAccessRoleDefaultPolicy4FF2CFAF"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.grantPull in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:75:10)"
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/ReportLambdaRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ReportLambdaRoleDefaultPolicyBD461524"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:136:22)",
+        "<anonymous> (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/bin/app.ts:11:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/azure-health-dashboard-stack/SchedulerRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SchedulerRoleDefaultPolicy66F774B8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.grantInvoke in aws-cdk-lib...",
+        "new InfraStack (/mnt/c/Users/lahcen.imourig/OneDrive - OneUGI/1 - IA Projects/azure-health-dashboard/infra/lib/infra-stack.ts:192:18)"
+      ]
+    }
+  ]
+}
