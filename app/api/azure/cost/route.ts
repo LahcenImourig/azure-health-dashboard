@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { getAllSubscriptions, getCostManagementClient } from '@/lib/azure-client';
-import type { CostSummary, CostByService, CostByResourceGroup } from '@/types/azure';
+import { getAllSubscriptions, getCostManagementClient, getCredential } from '@/lib/azure-client';
+import type { CostSummary, CostByService, CostByResourceGroup, ReservationSummary } from '@/types/azure';
 
 export async function GET() {
   const { authorized } = await requireAuth();
@@ -132,9 +132,73 @@ export async function GET() {
         .sort((a, b) => b.cost - a.cost),
     };
 
+    // Fetch reservation utilization
+    try {
+      const reservations = await fetchReservations(subscriptions.map(s => s.id), firstOfMonth, now, currency);
+      summary.reservations = reservations;
+    } catch (e) {
+      console.warn('Reservation fetch failed (non-blocking):', e);
+    }
+
     return NextResponse.json(summary);
   } catch (error) {
     console.error('Cost API error:', error);
     return NextResponse.json({ error: 'Failed to fetch cost data' }, { status: 500 });
   }
+}
+
+async function fetchReservations(
+  subscriptionIds: string[],
+  from: Date,
+  to: Date,
+  currency: string
+): Promise<ReservationSummary[]> {
+  const credential = getCredential();
+  const reservations: ReservationSummary[] = [];
+
+  // Use the Consumption API to get reservation usage summaries
+  // Scope: billing account or individual subscriptions
+  for (const subId of subscriptionIds.slice(0, 5)) {
+    try {
+      const scope = `/subscriptions/${subId}`;
+      const url = `https://management.azure.com${scope}/providers/Microsoft.Consumption/reservationSummaries?api-version=2023-05-01&grain=monthly&$filter=properties/usageDate ge '${from.toISOString().split('T')[0]}' and properties/usageDate le '${to.toISOString().split('T')[0]}'`;
+
+      const token = await credential.getToken('https://management.azure.com/.default');
+      if (!token) continue;
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token.token}` },
+      });
+
+      if (!res.ok) continue;
+      const data = await res.json();
+
+      for (const item of data.value ?? []) {
+        const props = item.properties ?? {};
+        reservations.push({
+          reservationId: props.reservationOrderId ?? item.id ?? '',
+          reservationName: props.reservationId ?? props.skuName ?? 'Unknown',
+          skuName: props.skuName ?? '',
+          location: props.region ?? '',
+          term: props.term ?? '',
+          utilizationPct: (props.avgUtilizationPercentage ?? props.utilizedPercentage ?? 0),
+          usedHours: props.usedHours ?? 0,
+          totalHours: props.reservedHours ?? 0,
+          monthlyCost: props.purchasedQuantity ?? props.totalReservedQuantity ?? 0,
+          currency,
+          subscriptionName: undefined,
+        });
+      }
+    } catch {
+      // Non-blocking, skip subscription
+    }
+  }
+
+  // Deduplicate by reservationId
+  const seen = new Set<string>();
+  return reservations.filter(r => {
+    if (seen.has(r.reservationId)) return false;
+    seen.add(r.reservationId);
+    return true;
+  });
 }

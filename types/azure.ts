@@ -104,6 +104,21 @@ export interface CostSummary {
   byService: CostByService[];
   byResourceGroup: CostByResourceGroup[];
   bySubscription: CostBySubscription[];
+  reservations?: ReservationSummary[];
+}
+
+export interface ReservationSummary {
+  reservationId: string;
+  reservationName: string;
+  skuName: string;
+  location: string;
+  term: string;
+  utilizationPct: number;
+  usedHours: number;
+  totalHours: number;
+  monthlyCost: number;
+  currency: string;
+  subscriptionName?: string;
 }
 
 export interface AlertRule {
