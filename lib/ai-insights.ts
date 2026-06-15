@@ -9,69 +9,73 @@ export const AI_MODEL = resolveModel();
 
 /* ----------------------------- Output schema ----------------------------- */
 
+// Helper: accept null as empty string
+const s = z.string().nullable().transform(v => v ?? '');
+const optStr = z.string().nullable().optional().transform(v => v ?? undefined);
+
 const HighlightSchema = z.object({
   icon: z.enum(['incident', 'cost', 'retirement', 'advisor', 'security', 'reliability']),
-  text: z.string(),
+  text: s,
 });
 
 const PriorityActionSchema = z.object({
   rank: z.number(),
-  title: z.string(),
-  why: z.string(),
+  title: s,
+  why: s,
   category: z.enum(['cost', 'reliability', 'security', 'retirement', 'incident']),
-  impact: z.string(),
+  impact: s,
   effort: z.enum(['Faible', 'Moyen', 'Élevé']),
-  deadline: z.string().optional(),
+  deadline: optStr,
 });
 
 const AdvisorClusterSchema = z.object({
-  key: z.string(),
-  label: z.string(),
+  key: s,
+  label: s,
   category: z.enum(['Cost', 'Security', 'Reliability', 'Performance', 'OperationalExcellence']),
   count: z.number(),
-  savingsUsd: z.number().optional(),
-  topResources: z.array(z.string()),
+  savingsUsd: z.number().nullable().optional().transform(v => v ?? undefined),
+  topResources: z.array(s),
 });
 
 const CostAnomalySchema = z.object({
-  resourceGroup: z.string(),
+  resourceGroup: s,
   changePct: z.number(),
   fromUsd: z.number(),
   toUsd: z.number(),
-  likelyCause: z.string(),
-  detectedOn: z.string(),
+  likelyCause: s,
+  detectedOn: s,
 });
 
 const CorrelationSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  diagnosis: z.string(),
+  id: s,
+  title: s,
+  diagnosis: s,
   confidence: z.enum(['Élevée', 'Moyenne']),
   signals: z.array(z.object({
     source: z.enum(['Health', 'Alerts', 'Advisor', 'Cost']),
-    detail: z.string(),
+    detail: s,
   })),
-  recommendation: z.string(),
+  recommendation: s,
 });
 
 const RetirementImpactSchema = z.object({
-  title: z.string(),
-  service: z.string(),
+  title: s,
+  service: s,
   daysLeft: z.number(),
   affectedCount: z.number(),
-  affectedResources: z.array(z.string()),
-  effort: z.string(),
+  affectedResources: z.array(s),
+  effort: s,
 });
 
 export const InsightsSchema = z.object({
   healthScore: z.object({
     current: z.number(),
     previous: z.number().nullable(),
-    reasoning: z.string(),
-    bySubscription: z.array(z.object({ name: z.string(), score: z.number() })),
+    reasoning: s,
+    bySubscription: z.array(z.object({ name: s, score: z.number() })),
   }),
   morningBrief: z.object({
-    summary: z.string(),
+    summary: s,
     highlights: z.array(HighlightSchema),
   }),
   priorityActions: z.array(PriorityActionSchema),
