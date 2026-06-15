@@ -1,5 +1,5 @@
 import { requireAuth } from '@/lib/auth-guard';
-import { getAllSubscriptions } from '@/lib/azure-client';
+import { getAllSubscriptions, queryResourceGraph } from '@/lib/azure-client';
 import { getAIClient, isAIConfigured, resolveModel } from '@/lib/ai-client';
 import { buildSnapshot, type TenantData } from '@/lib/ai-insights';
 import type { ServiceHealthEvent, RetirementNotice, AdvisorRecommendation, AlertRule, CostSummary } from '@/types/azure';
@@ -51,6 +51,27 @@ export async function POST(req: Request) {
     getAllSubscriptions(),
   ]);
 
+  // Fetch resource inventory via Azure Resource Graph for richer context
+  let resourceInventory = '';
+  try {
+    const resources = await queryResourceGraph(
+      `Resources | summarize count() by type, subscriptionId | order by count_ desc | take 50`
+    ) as Array<{ type: string; subscriptionId: string; count_: number }>;
+
+    const vms = await queryResourceGraph(
+      `Resources | where type == 'microsoft.compute/virtualmachines' | project name, resourceGroup, location, properties.extended.instanceView.powerState.code, tags | take 100`
+    ) as Array<{ name: string; resourceGroup: string; location: string; tags?: Record<string, string> }>;
+
+    if (resources.length > 0) {
+      resourceInventory = `\n\n### RESOURCE INVENTORY (top resource types)\n${resources.map(r => `- ${r.type}: ${r.count_}`).join('\n')}`;
+    }
+    if (vms.length > 0) {
+      resourceInventory += `\n\n### VIRTUAL MACHINES (${vms.length})\n${vms.map(v => `- ${v.name} | RG: ${v.resourceGroup} | Location: ${v.location}${v.tags ? ` | Tags: ${Object.entries(v.tags).map(([k, val]) => `${k}=${val}`).join(', ')}` : ''}`).join('\n')}`;
+    }
+  } catch (err) {
+    console.warn('Resource Graph query failed for chat context:', err);
+  }
+
   const data: TenantData = {
     incidents: Array.isArray(incidents) ? incidents : [],
     retirements: Array.isArray(retirements) ? retirements : [],
@@ -60,7 +81,7 @@ export async function POST(req: Request) {
     subscriptions: subscriptions.map(s => ({ id: s.id, displayName: s.displayName })),
   };
 
-  const snapshot = buildSnapshot(data);
+  const snapshot = buildSnapshot(data) + resourceInventory;
   const client = getAIClient();
 
   const stream = new ReadableStream({
