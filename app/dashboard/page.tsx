@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { Activity, TrendingUp, DollarSign, Bell, Archive, LayoutDashboard, Sparkles, Wrench } from 'lucide-react';
+import { Activity, TrendingUp, DollarSign, Bell, Archive, LayoutDashboard, Sparkles, Wrench, RefreshCw } from 'lucide-react';
 import { Navbar } from '@/components/dashboard/navbar';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { StatCardSkeleton } from '@/components/dashboard/loading-skeleton';
@@ -29,25 +29,33 @@ export default function DashboardPage() {
     return Array.isArray(data) ? data : [];
   }
 
-  const { data: incidents, refetch: refetchHealth } = useQuery<ServiceHealthEvent[]>({
+  const CACHE_TIME = 5 * 60 * 1000; // 5 minutes cache
+
+  const { data: incidents, refetch: refetchHealth, isFetching: fetchingHealth } = useQuery<ServiceHealthEvent[]>({
     queryKey: ['health'],
     queryFn: () => fetchArray<ServiceHealthEvent>('/api/azure/health'),
     initialData: [],
+    staleTime: CACHE_TIME,
+    gcTime: CACHE_TIME * 2,
   });
 
-  const { data: retirements, refetch: refetchRetirements } = useQuery<RetirementNotice[]>({
+  const { data: retirements, refetch: refetchRetirements, isFetching: fetchingRetirements } = useQuery<RetirementNotice[]>({
     queryKey: ['retirements'],
     queryFn: () => fetchArray<RetirementNotice>('/api/azure/retirements'),
     initialData: [],
+    staleTime: CACHE_TIME,
+    gcTime: CACHE_TIME * 2,
   });
 
-  const { data: recommendations, refetch: refetchAdvisor } = useQuery<AdvisorRecommendation[]>({
+  const { data: recommendations, refetch: refetchAdvisor, isFetching: fetchingAdvisor } = useQuery<AdvisorRecommendation[]>({
     queryKey: ['advisor'],
     queryFn: () => fetchArray<AdvisorRecommendation>('/api/azure/advisor'),
     initialData: [],
+    staleTime: CACHE_TIME,
+    gcTime: CACHE_TIME * 2,
   });
 
-  const { data: cost, refetch: refetchCost } = useQuery<CostSummary | null>({
+  const { data: cost, refetch: refetchCost, isFetching: fetchingCost } = useQuery<CostSummary | null>({
     queryKey: ['cost'],
     queryFn: async () => {
       const res = await fetch('/api/azure/cost');
@@ -55,12 +63,16 @@ export default function DashboardPage() {
       return data && !data.error ? data : null;
     },
     initialData: null,
+    staleTime: CACHE_TIME,
+    gcTime: CACHE_TIME * 2,
   });
 
-  const { data: alerts, refetch: refetchAlerts } = useQuery<AlertRule[]>({
+  const { data: alerts, refetch: refetchAlerts, isFetching: fetchingAlerts } = useQuery<AlertRule[]>({
     queryKey: ['alerts'],
     queryFn: () => fetchArray<AlertRule>('/api/azure/alerts'),
     initialData: [],
+    staleTime: CACHE_TIME,
+    gcTime: CACHE_TIME * 2,
   });
 
   function handleRefresh() {
@@ -135,6 +147,16 @@ export default function DashboardPage() {
         </Link>
 
         {/* KPI Stats */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Key Metrics</h2>
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <RefreshCw className={`h-4 w-4 ${fetchingHealth || fetchingRetirements || fetchingAdvisor || fetchingCost || fetchingAlerts ? 'animate-spin' : ''}`} />
+            Refresh all
+          </button>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {false ? (
             <></>
@@ -146,6 +168,8 @@ export default function DashboardPage() {
                 subtitle={criticalCount > 0 ? `${criticalCount} critical` : 'All clear'}
                 icon={Activity}
                 status={healthStatus}
+                onRefresh={() => refetchHealth()}
+                isRefreshing={fetchingHealth}
               />
               <StatCard
                 title="Retiring (90d)"
@@ -153,6 +177,8 @@ export default function DashboardPage() {
                 subtitle={`${retirements.filter(r => r.daysUntilRetirement <= 30).length} within 30 days`}
                 icon={Archive}
                 status={retiring90.length > 0 ? 'warning' : 'good'}
+                onRefresh={() => refetchRetirements()}
+                isRefreshing={fetchingRetirements}
               />
               <StatCard
                 title="Advisor Tips"
@@ -160,6 +186,8 @@ export default function DashboardPage() {
                 subtitle={`${recommendations.filter(r => r.impact === 'High').length} high impact`}
                 icon={TrendingUp}
                 status={recommendations.some(r => r.impact === 'High') ? 'warning' : 'good'}
+                onRefresh={() => refetchAdvisor()}
+                isRefreshing={fetchingAdvisor}
               />
               <StatCard
                 title="Month Spend"
@@ -167,6 +195,8 @@ export default function DashboardPage() {
                 subtitle={costData ? `${(costData.budgetUtilizationPct ?? 0).toFixed(0)}% of budget` : 'Loading…'}
                 icon={DollarSign}
                 status={costStatus}
+                onRefresh={() => refetchCost()}
+                isRefreshing={fetchingCost}
               />
               <StatCard
                 title="Active Alerts"
@@ -174,6 +204,8 @@ export default function DashboardPage() {
                 subtitle={`${criticalAlerts} critical • ${errorAlerts} errors`}
                 icon={Bell}
                 status={alertStatus}
+                onRefresh={() => refetchAlerts()}
+                isRefreshing={fetchingAlerts}
               />
             </>
           )}

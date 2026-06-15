@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { RefreshCw } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -10,6 +11,8 @@ interface StatCardProps {
   icon: LucideIcon;
   status?: 'good' | 'warning' | 'critical' | 'neutral';
   className?: string;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 const statusStyles = {
@@ -33,7 +36,7 @@ const valueStyles = {
   neutral: 'text-foreground',
 };
 
-export function StatCard({ title, value, subtitle, icon: Icon, status = 'neutral', className }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon: Icon, status = 'neutral', className, onRefresh, isRefreshing }: StatCardProps) {
   return (
     <div className={cn(
       'rounded-xl border p-5 shadow-sm transition-shadow hover:shadow-md',
@@ -46,8 +49,20 @@ export function StatCard({ title, value, subtitle, icon: Icon, status = 'neutral
           <p className={cn('text-3xl font-bold tabular-nums', valueStyles[status])}>{value}</p>
           {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
         </div>
-        <div className={cn('rounded-lg p-2.5 bg-white/60 dark:bg-black/20', iconStyles[status])}>
-          <Icon className="h-5 w-5" />
+        <div className="flex flex-col items-center gap-2">
+          <div className={cn('rounded-lg p-2.5 bg-white/60 dark:bg-black/20', iconStyles[status])}>
+            <Icon className="h-5 w-5" />
+          </div>
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw className={cn('h-3.5 w-3.5 text-muted-foreground', isRefreshing && 'animate-spin')} />
+            </button>
+          )}
         </div>
       </div>
     </div>
