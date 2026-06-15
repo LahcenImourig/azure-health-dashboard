@@ -31,46 +31,41 @@ export default function DashboardPage() {
 
   const CACHE_TIME = 5 * 60 * 1000; // 5 minutes cache
 
-  const { data: incidents, refetch: refetchHealth, isFetching: fetchingHealth } = useQuery<ServiceHealthEvent[]>({
+  const { data: incidents = [], refetch: refetchHealth, isFetching: fetchingHealth, isLoading: loadingHealth } = useQuery<ServiceHealthEvent[]>({
     queryKey: ['health'],
     queryFn: () => fetchArray<ServiceHealthEvent>('/api/azure/health'),
-    initialData: [],
     staleTime: CACHE_TIME,
     gcTime: CACHE_TIME * 2,
   });
 
-  const { data: retirements, refetch: refetchRetirements, isFetching: fetchingRetirements } = useQuery<RetirementNotice[]>({
+  const { data: retirements = [], refetch: refetchRetirements, isFetching: fetchingRetirements } = useQuery<RetirementNotice[]>({
     queryKey: ['retirements'],
     queryFn: () => fetchArray<RetirementNotice>('/api/azure/retirements'),
-    initialData: [],
     staleTime: CACHE_TIME,
     gcTime: CACHE_TIME * 2,
   });
 
-  const { data: recommendations, refetch: refetchAdvisor, isFetching: fetchingAdvisor } = useQuery<AdvisorRecommendation[]>({
+  const { data: recommendations = [], refetch: refetchAdvisor, isFetching: fetchingAdvisor } = useQuery<AdvisorRecommendation[]>({
     queryKey: ['advisor'],
     queryFn: () => fetchArray<AdvisorRecommendation>('/api/azure/advisor'),
-    initialData: [],
     staleTime: CACHE_TIME,
     gcTime: CACHE_TIME * 2,
   });
 
-  const { data: cost, refetch: refetchCost, isFetching: fetchingCost } = useQuery<CostSummary | null>({
+  const { data: cost = null, refetch: refetchCost, isFetching: fetchingCost } = useQuery<CostSummary | null>({
     queryKey: ['cost'],
     queryFn: async () => {
       const res = await fetch('/api/azure/cost');
       const data = await res.json();
       return data && !data.error ? data : null;
     },
-    initialData: null,
     staleTime: CACHE_TIME,
     gcTime: CACHE_TIME * 2,
   });
 
-  const { data: alerts, refetch: refetchAlerts, isFetching: fetchingAlerts } = useQuery<AlertRule[]>({
+  const { data: alerts = [], refetch: refetchAlerts, isFetching: fetchingAlerts } = useQuery<AlertRule[]>({
     queryKey: ['alerts'],
     queryFn: () => fetchArray<AlertRule>('/api/azure/alerts'),
-    initialData: [],
     staleTime: CACHE_TIME,
     gcTime: CACHE_TIME * 2,
   });
